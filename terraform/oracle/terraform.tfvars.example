@@ -1,0 +1,42 @@
+# Copia este archivo como terraform.tfvars y llena los valores.
+# terraform.tfvars NUNCA se sube al repositorio: tiene la ruta a tu llave.
+
+# --- Credenciales de la API -------------------------------------------------
+# Consola de Oracle, icono de perfil arriba a la derecha, tu cuenta de correo,
+# pestaña "Tokens y claves", seccion "Claves de API", "Agregar clave de API".
+# Descarga la clave privada y Oracle muestra una "Vista previa del archivo de
+# configuracion" con estos cuatro valores. Copialos antes de cerrar la ventana.
+
+tenancy_ocid     = "ocid1.tenancy.oc1..xxxxx"
+user_ocid        = "ocid1.user.oc1..xxxxx"
+fingerprint      = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
+private_key_path = "~/.oci/oci_api_key.pem"
+
+# Tu region de ORIGEN. Es la que elegiste al crear la cuenta y no se puede
+# cambiar. Las maquinas gratis solo existen ahi.
+region = "sa-santiago-1"
+
+# --- Que maquina quieres ----------------------------------------------------
+
+# La buena, si tu region tiene capacidad:
+shape      = "VM.Standard.A1.Flex"
+ocpus      = 1
+memoria_gb = 6
+
+# El plan B, casi siempre disponible. Descomenta estas dos y comenta las tres
+# de arriba. Con esta unidad ocpus y memoria_gb se ignoran, son fijas.
+# shape = "VM.Standard.E2.1.Micro"
+
+nombre   = "agente"
+disco_gb = 50
+
+# --- Acceso -----------------------------------------------------------------
+
+ssh_public_key_path = "~/.ssh/id_rsa.pub"
+
+# Tu IP, para no dejar el 22 abierto al mundo. La sacas con: curl ifconfig.me
+# Si la dejas en 0.0.0.0/0 vas a tener bots golpeando la puerta en dos horas.
+ssh_origen_cidr = "0.0.0.0/0"
+
+# Swap. En maquinas de 1 GB no lo bajes de 2.
+swap_gb = 2

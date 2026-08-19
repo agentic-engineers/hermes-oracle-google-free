@@ -1,0 +1,51 @@
+#cloud-config
+# Se ejecuta una sola vez, cuando la maquina arranca por primera vez.
+#
+# Lo unico que hace es dejar la maquina en condiciones de instalar algo pesado
+# sin morirse. En maquinas de 1 GB esto NO es opcional: la instalacion de
+# Hermes llega a un pico de ~766 MB de RAM mas ~350 de swap. Sin swap, el
+# kernel mata el proceso a la mitad y el error que ves no dice "me quede sin
+# memoria", dice cualquier otra cosa.
+
+package_update: true
+
+packages:
+  - curl
+  - git
+  - ca-certificates
+  # libatomic1 la necesita el Node 26 que se baja Hermes para las herramientas
+  # de navegador. Sin ella el binario no arranca, el instalador cree que Node
+  # esta viejo, lo vuelve a bajar, y entra en bucle. La imagen de Oracle no la
+  # trae: aparece solo si instalaste build-essential u otra cosa que la arrastre.
+  - libatomic1
+
+write_files:
+  # swappiness bajo: que prefiera la RAM y use el disco solo cuando aprieta.
+  # El swap aca es red de seguridad contra un pico, no memoria de trabajo.
+  - path: /etc/sysctl.d/99-swap.conf
+    content: |
+      vm.swappiness=20
+    permissions: '0644'
+
+runcmd:
+  - |
+    set -e
+    if ! swapon --show | grep -q /swapfile; then
+      fallocate -l ${swap_gb}G /swapfile
+      chmod 600 /swapfile
+      mkswap /swapfile
+      swapon /swapfile
+      # Sin esta linea el swap se pierde al primer reinicio.
+      grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    fi
+    sysctl -p /etc/sysctl.d/99-swap.conf
+
+  # Servicios que trae la imagen de Oracle y que en un servidor personal no
+  # ocupas. Entre los tres se llevan cerca de 80 MB, que en 954 no es poco.
+  - systemctl disable --now fwupd.service 2>/dev/null || true
+  - systemctl disable --now snapd.service snapd.socket 2>/dev/null || true
+
+  # Marca para saber que cloud-init termino de verdad.
+  - touch /var/lib/cloud/LISTO
+
+final_message: "Maquina lista en $UPTIME segundos. Swap y limpieza aplicados."

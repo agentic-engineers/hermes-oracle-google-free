@@ -1,0 +1,48 @@
+# Copia este archivo como terraform.tfvars y llena los valores.
+# terraform.tfvars NUNCA se sube al repositorio: tiene tu proyecto y tu IP.
+#
+# Si usas hermes.sh no necesitas tocar esto: el script lo escribe por ti,
+# despues de dejar tu cuenta lista (gcloud, sesiones, proyecto, facturacion
+# y la API de Compute encendida).
+
+# --- Tu proyecto ------------------------------------------------------------
+# El ID, no el nombre para mostrar. Lo ves arriba en la consola, o con:
+#   gcloud projects list
+
+proyecto = "mi-proyecto-123456"
+
+# --- Donde ------------------------------------------------------------------
+# El nivel siempre gratis SOLO cubre estas tres regiones. Cualquier otra cobra.
+#   us-west1     Oregon
+#   us-central1  Iowa
+#   us-east1     Carolina del Sur
+
+region = "us-central1"
+zona   = "us-central1-a"
+
+# --- La maquina -------------------------------------------------------------
+# La unidad es e2-micro y no se elige: es la unica que entra en el nivel
+# siempre gratis. Son 1 GB de RAM y CPU compartida.
+
+nombre = "agente"
+
+# 30 GB es el tope del nivel gratis. Mas que eso se cobra, y el modulo
+# no te deja pasarte.
+disco_gb = 30
+
+# --- Acceso -----------------------------------------------------------------
+
+ssh_public_key_path = "~/.ssh/id_rsa.pub"
+
+# Tu IP, para no dejar el 22 abierto al mundo. La sacas con: curl ifconfig.me
+# Si la dejas en 0.0.0.0/0 vas a tener bots golpeando la puerta en dos horas.
+ssh_origen_cidr = "0.0.0.0/0"
+
+# Swap. Con 1 GB de RAM no lo bajes de 2, o la instalacion de Hermes se muere
+# a la mitad sin decirte que fue por memoria.
+swap_gb = 2
+
+# --- El limite que decide si Google te sirve --------------------------------
+# 1 GB de trafico de SALIDA al mes. Oracle da 10 TB.
+# Un agente que conversa por mensajeria no lo nota. Uno que navega o descarga
+# archivos se lo come en dias, y a partir de ahi se cobra.
